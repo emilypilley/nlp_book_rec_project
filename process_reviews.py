@@ -62,6 +62,35 @@ class GoodreadsBookInfo():
             return book_url_list
 
 
+    def get_book_info_from_url(self, book_page_url):
+        book_info = {}
+        book_page_html = requests.get(book_page_url)
+        book_data = BeautifulSoup(book_page_html.text, 'html.parser')
+
+        book_info['title'] = book_data.select_one("meta[property='og:title']")['content']
+        book_info['isbn'] = book_data.select_one("meta[property='books:isbn']")['content']
+
+        author_url = book_data.select_one("meta[property='books:author']")['content']
+        author_page_html = requests.get(author_url)
+        author_data = BeautifulSoup(author_page_html.text, 'html.parser')
+        book_info['author'] = author_data.select_one("meta[property='og:title']")['content']
+
+        rating = book_data.select_one("span[itemprop='ratingValue']").text
+        book_info['rating'] = re.findall(r"\d\.\d+", rating)[0]
+
+        book_info['total_rating_count'] = book_data.select_one("meta[itemprop='ratingCount']")['content']
+        book_info['total_review_count'] = book_data.select_one("meta[itemprop='reviewCount']")['content']
+
+        # first item is actually synopsis, rest are reviews
+        reviews = book_data.find_all(id=re.compile("freeText\d+"))
+        book_info['synopsis']= reviews[0]
+        book_info['reviews_text'] = [review.get_text() for review in reviews[1:]]
+
+        print("Got: ", book_data.select_one("meta[property='og:title']")['content'])
+
+        return book_info
+
+
     def get_top_n_books_info(self, num_books):
         if path.exists('top_books_data/book_info_dicts.p'):
             return pickle.load(open('top_books_data/book_info_dicts.p', 'rb'))
@@ -69,40 +98,22 @@ class GoodreadsBookInfo():
             book_info_dicts = []
             for i in range(num_books):
             # for i in range(3):
-                book_info = {}
                 book_page_url = self.list_of_book_urls[i]
-
                 try:
-                  book_page_html = requests.get(book_page_url)
-                  book_data = BeautifulSoup(book_page_html.text, 'html.parser')
-
-                  book_info['title'] = book_data.select_one("meta[property='og:title']")['content']
-                  book_info['isbn'] = book_data.select_one("meta[property='books:isbn']")['content']
-
-                  author_url = book_data.select_one("meta[property='books:author']")['content']
-                  author_page_html = requests.get(author_url)
-                  author_data = BeautifulSoup(author_page_html.text, 'html.parser')
-                  book_info['author'] = author_data.select_one("meta[property='og:title']")['content']
-
-                  rating = book_data.select_one("span[itemprop='ratingValue']").text
-                  book_info['rating'] = re.findall(r"\d\.\d+", rating)[0]
-
-                  book_info['total_rating_count'] = book_data.select_one("meta[itemprop='ratingCount']")['content']
-                  book_info['total_review_count'] = book_data.select_one("meta[itemprop='reviewCount']")['content']
-
-                  # first item is actually synopsis, rest are reviews
-                  reviews = book_data.find_all(id=re.compile("freeText\d+"))
-                  book_info['synopsis']= reviews[0]
-                  book_info['reviews_text'] = [review.get_text() for review in reviews[1:]]
-
-                  book_info_dicts.append(book_info)
-                  print("Got: ", book_data.select_one("meta[property='og:title']")['content'])
-
-                # except requests.exceptions.ConnectionError:
+                  book_info_dicts.append(self.get_book_info_from_url(book_page_url))
                 except Exception:
-                  print("Error with: ", book_page_url)
+                  try:
+                    book_info_dicts.append(self.get_book_info_from_url(book_page_url))
+                  except Exception:
+                    try:
+                        book_info_dicts.append(self.get_book_info_from_url(book_page_url))
+                    except Exception:
+                        print("Error with: ", book_page_url)
 
                 time.sleep(5)
             
             pickle.dump(book_info_dicts, open('top_books_data/book_info_dicts.p', 'wb'))
             return book_info_dicts
+
+if __name__ == '__main__':
+    book_info_obj = GoodreadsBookInfo(num_pages=5, num_books=500)
