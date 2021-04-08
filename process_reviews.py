@@ -90,12 +90,10 @@ class GoodreadsBookInfo():
     def get_top_n_books_info(self, num_books):
         if path.exists('top_books_data/book_info_dicts.p'):
             with open('top_books_data/book_info_dicts.p', 'rb') as f:
-                print('unpickled')
                 return pickle.load(f)
         else:
             book_info_dicts = []
             for i in range(num_books):
-            # for i in range(3):
                 book_page_url = self.list_of_book_urls[i]
                 try:
                     book_info_dict = self.get_book_info_from_url(book_page_url)
@@ -125,5 +123,5 @@ if __name__ == '__main__':
     max_rec = 0x100000
     sys.setrecursionlimit(max_rec)
 
-    book_info_obj = GoodreadsBookInfo(num_pages=1, num_books=10)
+    book_info_obj = GoodreadsBookInfo(num_pages=5, num_books=500)
     print(book_info_obj.book_info_dict[0])
