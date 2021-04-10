@@ -6,6 +6,13 @@ import re
 import pickle
 from bs4 import BeautifulSoup
 import sys
+import spacy
+import numpy as np
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import NMF
+from sklearn.decomposition import LatentDirichletAllocation as LDA
+
 
 class GoodreadsBookInfo():
     def __init__(self, num_pages=5, num_books=500):
@@ -118,10 +125,55 @@ class GoodreadsBookInfo():
                 pickle.dump(book_info_dicts, f)
 
             return book_info_dicts
+    
+
+class BookTextAnalyzer():
+    def __init__(self, synopses_list, reviews_list, seed=7):
+        self.seed = seed
+        self.synopses_list = synopses_list
+        self.reviews_list = reviews_list
+        self.spacy_nlp = spacy.load('en_core_web_sm')
+
+
+    def get_synopsis_topics(self, num_topics=20):
+        # lemmatize, remove non-alphabetic words and stopwords
+        processed_synopses = []
+        for synopsis in self.spacy_nlp.pipe(self.synopses_list):
+            only_alpha = ' '.join(token.lemma_ for token in synopsis if token.lemma_.isalpha() and not token.is_stop)
+            processed_synopses.append(only_alpha)
+        
+        tf_idf_vec = TfidfVectorizer(max_features=5000, lowercase=True, tokenizer=self.spacy_nlp)
+        synopses_features = tf_idf_vec.fit_transform(processed_synopses)
+
+        nmf = NMF(n_components=num_topics, random_state=self.seed)
+        nmf.fit(synopses_features)
+
+        # list of unique words found by vectorizer
+        synopses_feature_names = tf_idf_vec.get_feature_names()
+
+        # number of words to display per topic
+        n_top_words = 10
+
+        for idx, topic_vec in enumerate(nmf.components_):
+            print(idx, end=' ')
+            for fid in topic_vec.argsort()[-1:-n_top_words-1:-1]:
+                print(synopses_feature_names[fid], end=' ')
+            print()
+
 
 if __name__ == '__main__':
     max_rec = 0x100000
     sys.setrecursionlimit(max_rec)
 
     book_info_obj = GoodreadsBookInfo(num_pages=5, num_books=500)
-    print(book_info_obj.book_info_dict[0])
+    all_books_info = book_info_obj.book_info_dict
+    print(len(all_books_info))
+
+    all_synopses = [book['synopsis'] for book in all_books_info]
+    # print('all synopses: ', len(all_synopses))
+    all_reviews = [review for book in all_books_info for review in book['reviews_text']]
+    # print('all reviews: ', len(all_reviews))
+    # print(all_reviews[77])
+
+    book_analyzer = BookTextAnalyzer(all_synopses, all_reviews)
+    book_analyzer.get_synopsis_topics()
