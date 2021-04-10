@@ -11,3 +11,4 @@ With these analyses of a given book as input, a clustering algorithm groups toge
 
 # Resources:
 * https://harvard-iacs.github.io/2018-CS109A/labs/lab-2/scraping/student/
+* https://sanjayasubedi.com.np/nlp/nlp-with-python-topic-modeling/
