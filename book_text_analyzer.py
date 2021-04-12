@@ -6,23 +6,28 @@ from sklearn.decomposition import NMF
    
 
 class BookTextAnalyzer():
-    def __init__(self, synopses_list, reviews_list, seed=7):
+    def __init__(self, synopses_list, reviews_list, num_synopses_topics=20, 
+                words_per_synopses_topic=10, num_reviews_topics=20, 
+                words_per_reviews_topic=10, seed=7):
         self.seed = seed
         self.spacy_nlp = spacy.load('en_core_web_sm')
 
         self.synopses_list = synopses_list
         self.reviews_list = reviews_list
         
-        self.synopses_topics = self.get_synopses_topics()
-        self.reviews_topics = self.get_reviews_topics()
+        self.synopses_topics = self.get_synopses_topics(num_synopses_topics, words_per_synopses_topic)
+        self.reviews_topics = self.get_reviews_topics(num_reviews_topics, words_per_reviews_topic)
 
     def get_text_features(self, text_list):
         processed_text = []
 
         # lemmatize, remove non-alphabetic words and stopwords
         for text in self.spacy_nlp.pipe(text_list):
-            only_alpha = ' '.join(token.lemma_ for token in text if token.lemma_.isalpha() and not token.is_stop)
-            processed_text.append(only_alpha)
+            # only_alpha = ' '.join(token.lemma_ for token in text if token.lemma_.isalpha() and not token.is_stop)
+            # processed_text.append(only_alpha)
+            only_alpha_nouns = ' '.join(token.lemma_ for token in text 
+                                        if token.lemma_.isalpha() and not token.is_stop and token.pos_ == 'NOUN')
+            processed_text.append(only_alpha_nouns)
         
         tf_idf_vec = TfidfVectorizer(max_features=5000, lowercase=True, tokenizer=self.spacy_nlp)
 

@@ -4,6 +4,7 @@ from os import path
 import re
 import pickle
 from bs4 import BeautifulSoup
+import langdetect
 
 
 class GoodreadsBookInfo():
@@ -79,7 +80,8 @@ class GoodreadsBookInfo():
             # first item is actually synopsis, rest are reviews
             reviews = book_data.find_all(id=re.compile("freeText\d+"))
             book_info['synopsis']= reviews[0].get_text()
-            book_info['reviews_text'] = [review.get_text() for review in reviews[1:]]
+            book_info['reviews_text'] = [review.get_text() for review in reviews[1:] 
+                                        if langdetect.detect(review.get_text()) == 'en']
 
             print("Got: ", book_data.select_one("meta[property='og:title']")['content'])
 
