@@ -45,40 +45,47 @@ class BookTextAnalyzer():
         return (text_features, text_feature_names)
     
 
-    def get_synopses_topic_model(self, text_features, num_topics=20):
-        if path.exists('topic_models/synopses_model.joblib'):
-            with open('topic_models/synopses_model.joblib', 'rb') as f:
+    def get_synopses_topic_model(self, text_features, num_topics=20, model_name='nmf'):
+        if path.exists('topic_models/synopses_' + model_name + '_model_' + str(num_topics) + '_topics.joblib'):
+            with open('topic_models/synopses_' + model_name + '_model_' + str(num_topics) + '_topics.joblib', 'rb') as f:
                 return joblib.load(f)
         else:
-            # model = NMF(n_components=num_topics, random_state=self.seed)
-            model = LDA(n_components=num_topics, random_state=self.seed)
+            if model_name == 'nmf':
+                model = NMF(n_components=num_topics, random_state=self.seed)
+            elif model_name == 'lda':
+                model = LDA(n_components=num_topics, random_state=self.seed)
+            else:
+                raise Exception("Invalid model name")
             model.fit(text_features)
-            joblib.dump(model, 'topic_models/synopses_model.joblib')
+            joblib.dump(model, 'topic_models/synopses_' + model_name + '_model_' + str(num_topics) + '_topics.joblib')
             return model
     
-    def get_reviews_topic_model(self, text_features, num_topics=20):
-        if path.exists('topic_models/reviews_model.joblib'):
-            with open('topic_models/reviews_model.joblib', 'rb') as f:
+    def get_reviews_topic_model(self, text_features, num_topics=20, model_name='nmf'):
+        if path.exists('topic_models/reviews_' + model_name + '_model_' + str(num_topics) + '_topics.joblib'):
+            with open('topic_models/reviews_' + model_name + '_model_' + str(num_topics) + '_topics.joblib', 'rb') as f:
                 return joblib.load(f)
         else:
-            # model = NMF(n_components=num_topics, random_state=self.seed)
-            model = LDA(n_components=num_topics, random_state=self.seed)
+            if model_name == 'nmf':
+                model = NMF(n_components=num_topics, random_state=self.seed)
+            elif model_name == 'lda':
+                model = LDA(n_components=num_topics, random_state=self.seed)
+            else:
+                raise Exception("Invalid model name")
             model.fit(text_features)
-            joblib.dump(model, 'topic_models/reviews_model.joblib')
+            joblib.dump(model, 'topic_models/reviews_' + model_name + '_model_' + str(num_topics) + '_topics.joblib')
             return model
 
 
     def get_clusters(self, text_list, for_synopses=False, num_topics=20, words_per_topic=10):
         if for_synopses:
             text_features, text_feature_names = self.get_text_features(text_list, 'synopses')
-            model = self.get_synopses_topic_model(text_features, num_topics)
+            model = self.get_synopses_topic_model(text_features, num_topics, model_name='lda')
         else:
             text_features, text_feature_names = self.get_text_features(text_list, 'reviews')
-            model = self.get_reviews_topic_model(text_features, num_topics)
+            model = self.get_reviews_topic_model(text_features, num_topics, model_name='lda')
 
         topic_clusters = []
         for idx, topic_vec in enumerate(model.components_):
-            # print(topic_vec.shape)
             print(idx, end=' ')
 
             topic_words = []

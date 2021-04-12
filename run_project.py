@@ -13,4 +13,4 @@ if __name__ == '__main__':
     all_synopses = [book['synopsis'] for book in all_books_info]
     all_reviews = [review for book in all_books_info for review in book['reviews_text']]
 
-    book_analyzer = BookTextAnalyzer(all_synopses, all_reviews, num_reviews_topics=10)
+    book_analyzer = BookTextAnalyzer(all_synopses, all_reviews, num_reviews_topics=20)
