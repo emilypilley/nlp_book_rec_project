@@ -20,5 +20,21 @@ if __name__ == '__main__':
     synopses_topics = book_analyzer.synopses_topics
     # print(synopses_topics[0])
 
-    reviews_topics = book_analyzer.reviews_topics
+    # reviews_topics = book_analyzer.reviews_topics
     # print(reviews_topics[0])
+
+
+    ################## NOT IMPLEMENTED YET ####################
+
+    all_books_synopses_topics = book_analyzer.get_books_synopses_topics(all_books_info)
+    # print('\n\nBook Synopses Topics:\n', all_books_synopses_topics)
+
+    # review_topics_keywords_dict = book_analyzer.get_reviews_topics_keywords()
+    # print('\n\nReview Topics Keywords:\n', review_topics_keywords_dict)
+
+    # books_reviews_dict = {}
+    # for book in all_books_info:
+        # title_author_str = book['title'] + '-' + book['author']
+    #     books_reviews_dict[title_author_str.replace(' ', '_')] = book['reviews_text']
+
+    # review_sentiment_analyzer = ReviewTopicsSentimentAnalyzer(books_reviews_dict, review_topics_keywords_dict)
