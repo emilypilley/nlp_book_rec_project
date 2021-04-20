@@ -23,7 +23,7 @@ class BookTextAnalyzer():
         self.reviews_model_type = reviews_model_type
 
         self.spacy_nlp = spacy.load('en_core_web_sm')
-        self.spacy_similarity_nlp = spacy.load('en_core_web_lg')
+        # self.spacy_similarity_nlp = spacy.load('en_core_web_lg')
 
         self.synopses_list = synopses_list
         self.reviews_list = reviews_list
@@ -51,8 +51,10 @@ class BookTextAnalyzer():
                 pickle.dump(processed_text, f)
             
         self.tf_idf_vec = TfidfVectorizer(max_features=5000, lowercase=True, tokenizer=self.spacy_nlp)
+        self.tf_idf_vec.fit(processed_text)
+        text_features = self.tf_idf_vec.transform(processed_text)
 
-        text_features = self.tf_idf_vec.fit_transform(processed_text)
+        # text_features = self.tf_idf_vec.fit_transform(processed_text)
         # list of unique words found by vectorizer
         text_feature_names = self.tf_idf_vec.get_feature_names()
 
@@ -138,6 +140,9 @@ class BookTextAnalyzer():
                 only_alpha_nouns .append(token.lemma_)
                     
         processed_text = ' '.join(only_alpha_nouns)
+        print('processed_text: ', processed_text)
+
+        print(type(self.tf_idf_vec))
         
         return self.tf_idf_vec.transform([processed_text])
 
@@ -149,7 +154,10 @@ class BookTextAnalyzer():
         for book in all_books_info_dicts[:5]:
             print(book['title'] + '-' + book['author'])
             synopsis = book['synopsis']
+            print('synopsis: ', synopsis)
             synopsis_features = self.get_topic_classification_features(synopsis)
+            print('features: ', synopsis_features)
+            print('output: ', self.synopses_model.transform(synopsis_features))
             res = np.squeeze(self.synopses_model.transform(synopsis_features))
             # top_book_topics = res.argsort(axis=1)[::-1]
             top_book_topics = res.argsort(axis=0)[:-1]
