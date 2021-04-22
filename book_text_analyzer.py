@@ -1,6 +1,7 @@
 from os import path
 import spacy
 import numpy as np
+import pandas as pd
 import joblib
 import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -26,7 +27,9 @@ class BookTextAnalyzer():
         # self.spacy_similarity_nlp = spacy.load('en_core_web_lg')
 
         self.synopses_list = synopses_list
+        self.synopses_features = None
         self.reviews_list = reviews_list
+        self.reviews_features = None
 
         self.tf_idf_vec = None
         self.synopses_model = None
@@ -49,10 +52,24 @@ class BookTextAnalyzer():
 
             with open('top_books_data/' + features + '_processed_text.p', 'wb') as f:
                 pickle.dump(processed_text, f)
+        
+        print('length of text list: ', len(text_list))
+        print('length of processed text: ', len(processed_text))
             
-        self.tf_idf_vec = TfidfVectorizer(max_features=5000, lowercase=True, tokenizer=self.spacy_nlp)
-        self.tf_idf_vec.fit(processed_text)
+        tf_idf_vec = TfidfVectorizer(max_features=5000, lowercase=True)
+        self.tf_idf_vec = tf_idf_vec.fit(processed_text)
         text_features = self.tf_idf_vec.transform(processed_text)
+
+        print('training features shape ', text_features.shape)
+        print('training features type ', type(text_features))
+        print('training features ', text_features.todense())
+        # pd.DataFrame(text_features.todense()).to_csv("synopses_text_features.csv")
+        pd.DataFrame(text_features.toarray(), columns=sorted(self.tf_idf_vec.vocabulary_.keys())).to_csv("synopses_text_features.csv")
+
+        if features == 'synopses':
+            self.synopses_features = text_features
+        elif features == 'reviews':
+            self.reviews_features = text_features
 
         # text_features = self.tf_idf_vec.fit_transform(processed_text)
         # list of unique words found by vectorizer
@@ -136,41 +153,53 @@ class BookTextAnalyzer():
     def get_topic_classification_features(self, synopsis):
         only_alpha_nouns = []
         for token in self.spacy_nlp(synopsis):
-            if token.lemma_.isalpha(): # and not token.is_stop and token.pos_ == 'NOUN':
+            if token.lemma_.isalpha() and not token.is_stop and token.pos_ == 'NOUN':
                 only_alpha_nouns .append(token.lemma_)
                     
         processed_text = ' '.join(only_alpha_nouns)
-        print('processed_text: ', processed_text)
-
-        print(type(self.tf_idf_vec))
-        
         return self.tf_idf_vec.transform([processed_text])
 
+    def get_topics_from_synopsis(self, synopsis_text):
+        synopsis_features = self.get_topic_classification_features(synopsis_text)
+        output = np.squeeze(self.synopses_model.transform(synopsis_features))
+        # top_book_topics = output.argsort(axis=1)[::-1]
+        top_book_topics = output.argsort(axis=0)[::-1]    # [:-1]
+        for topic in top_book_topics:
+            print('topic: ', topic, 'prob: ', output[topic])
+        return top_book_topics
 
     def get_books_synopses_topics(self, all_books_info_dicts):
         '''Builds a dictionary containg each book and the topics matched most closely by its synopses'''
         all_books_synopses_topics = {}
         print('\n\nBook Synopses Topics: ')
-        for book in all_books_info_dicts[:5]:
-            print(book['title'] + '-' + book['author'])
+        for book in all_books_info_dicts[:2]:
+            print(book['title'] + ' - ' + book['author'])
             synopsis = book['synopsis']
-            print('synopsis: ', synopsis)
-            synopsis_features = self.get_topic_classification_features(synopsis)
-            print('features: ', synopsis_features)
-            print('output: ', self.synopses_model.transform(synopsis_features))
-            res = np.squeeze(self.synopses_model.transform(synopsis_features))
-            # top_book_topics = res.argsort(axis=1)[::-1]
-            top_book_topics = res.argsort(axis=0)[:-1]
-            for topic in top_book_topics:
-                print('topic: ', topic, 'prob: ', res[topic])
-
+            topics = self.get_topics_from_synopsis(synopsis)
             title_author_str = book['title'] + '-' + book['author']
+            all_books_synopses_topics[title_author_str.replace(' ', '_')] = topics
+
+        #     title_author_str = book['title'] + '-' + book['author']
             # all_books_synopses_topics[title_author_str.replace(' ', '_')] = book_topics
+        # for idx, book in enumerate(all_books_info_dicts[:3]):
+        #     print(book['title'] + '-' + book['author'])
+        #     synopsis_features = self.synopses_features[idx]
+        #     print('features: ', synopsis_features)
+        #     print('output: ', self.synopses_model.transform(synopsis_features))
+        #     print('output_size: ', self.synopses_model.transform(synopsis_features).shape)
+        #     res = np.squeeze(self.synopses_model.transform(synopsis_features))
+        #     # top_book_topics = res.argsort(axis=1)[::-1]
+        #     top_book_topics = res.argsort(axis=0)[:-1]
+        #     for topic in top_book_topics:
+        #         print('topic: ', topic, 'prob: ', res[topic])
+
+        #     title_author_str = book['title'] + '-' + book['author']
 
         # print(all_books_synopses_topics)
         return all_books_synopses_topics
     
 
+    ##### TODO: FINISH IMPLEMENTING AND TESTING ##########
     # def get_n_most_similar_words(self, word, n=5):
     #     word = self.spacy_similarity_nlp.vocab[word]
     #     queries = [

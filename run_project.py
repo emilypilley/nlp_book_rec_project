@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     all_synopses = [book['synopsis'] for book in all_books_info]
     all_reviews = [review for book in all_books_info for review in book['reviews_text']]
-
+    
     book_analyzer = BookTextAnalyzer(all_synopses, all_reviews, num_synopses_topics=20, words_per_synopses_topic=10, 
                                     synopses_model_type='lda', num_reviews_topics=5, words_per_reviews_topic=10, 
                                     reviews_model_type='lda')
@@ -23,7 +23,8 @@ if __name__ == '__main__':
     # reviews_topics = book_analyzer.reviews_topics
     # print(reviews_topics[0])
 
-
+    # test = 'melodrama structure member principal story pimp inch day prose mini'
+    # book_analyzer.get_topics_from_synopsis(test)
     ################## NOT IMPLEMENTED YET ####################
 
     all_books_synopses_topics = book_analyzer.get_books_synopses_topics(all_books_info)
@@ -38,3 +39,4 @@ if __name__ == '__main__':
     #     books_reviews_dict[title_author_str.replace(' ', '_')] = book['reviews_text']
 
     # review_sentiment_analyzer = ReviewTopicsSentimentAnalyzer(books_reviews_dict, review_topics_keywords_dict)
+    
