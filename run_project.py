@@ -17,17 +17,16 @@ if __name__ == '__main__':
                                     synopses_model_type='lda', num_reviews_topics=5, words_per_reviews_topic=10, 
                                     reviews_model_type='lda')
 
-    synopses_topics = book_analyzer.synopses_topics
-    # print(synopses_topics[0])
+    all_books_synopses_topics = book_analyzer.get_books_synopses_classifications(all_books_info)
+    print('ALL BOOKS SYNOPSES TOPICS:')
+    for idx, book in enumerate(all_books_synopses_topics.items()):
+        if idx > 20:
+            break
+        print(book)
 
-    # reviews_topics = book_analyzer.reviews_topics
-    # print(reviews_topics[0])
-
-    # test = 'melodrama structure member principal story pimp inch day prose mini'
-    # book_analyzer.get_topics_from_synopsis(test)
     ################## NOT IMPLEMENTED YET ####################
 
-    all_books_synopses_topics = book_analyzer.get_books_synopses_topics(all_books_info)
+
     # print('\n\nBook Synopses Topics:\n', all_books_synopses_topics)
 
     # review_topics_keywords_dict = book_analyzer.get_reviews_topics_keywords()

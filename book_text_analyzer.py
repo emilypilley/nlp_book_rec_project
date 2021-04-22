@@ -27,16 +27,16 @@ class BookTextAnalyzer():
         # self.spacy_similarity_nlp = spacy.load('en_core_web_lg')
 
         self.synopses_list = synopses_list
-        self.synopses_features = None
         self.reviews_list = reviews_list
-        self.reviews_features = None
 
-        self.tf_idf_vec = None
+        self.tf_idf_syn_vec = None
+        self.tf_idf_rev_vec = None
         self.synopses_model = None
         self.reviews_model = None
         
         self.synopses_topics = self.get_synopses_topics()
-        # self.reviews_topics = self.get_reviews_topics()
+        self.reviews_topics = self.get_reviews_topics()
+
 
     def get_training_text_features(self, text_list, features):
         if path.exists('top_books_data/' + features + '_processed_text.p'):
@@ -52,28 +52,18 @@ class BookTextAnalyzer():
 
             with open('top_books_data/' + features + '_processed_text.p', 'wb') as f:
                 pickle.dump(processed_text, f)
-        
-        print('length of text list: ', len(text_list))
-        print('length of processed text: ', len(processed_text))
             
-        tf_idf_vec = TfidfVectorizer(max_features=5000, lowercase=True)
-        self.tf_idf_vec = tf_idf_vec.fit(processed_text)
-        text_features = self.tf_idf_vec.transform(processed_text)
-
-        print('training features shape ', text_features.shape)
-        print('training features type ', type(text_features))
-        print('training features ', text_features.todense())
-        # pd.DataFrame(text_features.todense()).to_csv("synopses_text_features.csv")
-        pd.DataFrame(text_features.toarray(), columns=sorted(self.tf_idf_vec.vocabulary_.keys())).to_csv("synopses_text_features.csv")
-
         if features == 'synopses':
-            self.synopses_features = text_features
-        elif features == 'reviews':
-            self.reviews_features = text_features
+            self.tf_idf_syn_vec = TfidfVectorizer(max_features=5000, lowercase=True)
+            self.tf_idf_syn_vec.fit(processed_text)
+            text_features = self.tf_idf_syn_vec.transform(processed_text)
+            text_feature_names = self.tf_idf_syn_vec.get_feature_names()
 
-        # text_features = self.tf_idf_vec.fit_transform(processed_text)
-        # list of unique words found by vectorizer
-        text_feature_names = self.tf_idf_vec.get_feature_names()
+        elif features == 'reviews':
+            self.tf_idf_rev_vec = TfidfVectorizer(max_features=5000, lowercase=True)
+            self.tf_idf_rev_vec.fit(processed_text)
+            text_features = self.tf_idf_rev_vec.transform(processed_text)
+            text_feature_names = self.tf_idf_rev_vec.get_feature_names()
 
         return (text_features, text_feature_names)
     
@@ -157,45 +147,34 @@ class BookTextAnalyzer():
                 only_alpha_nouns .append(token.lemma_)
                     
         processed_text = ' '.join(only_alpha_nouns)
-        return self.tf_idf_vec.transform([processed_text])
+        return self.tf_idf_syn_vec.transform([processed_text])
 
     def get_topics_from_synopsis(self, synopsis_text):
         synopsis_features = self.get_topic_classification_features(synopsis_text)
         output = np.squeeze(self.synopses_model.transform(synopsis_features))
-        # top_book_topics = output.argsort(axis=1)[::-1]
-        top_book_topics = output.argsort(axis=0)[::-1]    # [:-1]
-        for topic in top_book_topics:
-            print('topic: ', topic, 'prob: ', output[topic])
-        return top_book_topics
+        top_book_topics = output.argsort(axis=0)[::-1]
+        most_relevant_topics = []
+        for idx, topic in enumerate(top_book_topics):
+            # always add at least top topic - for NMF model probabilities are lower
+            if idx == 0:
+                most_relevant_topics.append((topic, output[topic]))
+                print('topic: ', topic, 'prob: ', output[topic])
+            # if there is a second or third relevant topic, add it as well
+            elif output[topic] >= 0.2:
+                most_relevant_topics.append((topic, output[topic]))
+                print('topic: ', topic, 'prob: ', output[topic])
+        return most_relevant_topics
 
-    def get_books_synopses_topics(self, all_books_info_dicts):
+    def get_books_synopses_classifications(self, all_books_info_dicts):
         '''Builds a dictionary containg each book and the topics matched most closely by its synopses'''
         all_books_synopses_topics = {}
         print('\n\nBook Synopses Topics: ')
-        for book in all_books_info_dicts[:2]:
+        for book in all_books_info_dicts[:20]:
             print(book['title'] + ' - ' + book['author'])
             synopsis = book['synopsis']
             topics = self.get_topics_from_synopsis(synopsis)
             title_author_str = book['title'] + '-' + book['author']
             all_books_synopses_topics[title_author_str.replace(' ', '_')] = topics
-
-        #     title_author_str = book['title'] + '-' + book['author']
-            # all_books_synopses_topics[title_author_str.replace(' ', '_')] = book_topics
-        # for idx, book in enumerate(all_books_info_dicts[:3]):
-        #     print(book['title'] + '-' + book['author'])
-        #     synopsis_features = self.synopses_features[idx]
-        #     print('features: ', synopsis_features)
-        #     print('output: ', self.synopses_model.transform(synopsis_features))
-        #     print('output_size: ', self.synopses_model.transform(synopsis_features).shape)
-        #     res = np.squeeze(self.synopses_model.transform(synopsis_features))
-        #     # top_book_topics = res.argsort(axis=1)[::-1]
-        #     top_book_topics = res.argsort(axis=0)[:-1]
-        #     for topic in top_book_topics:
-        #         print('topic: ', topic, 'prob: ', res[topic])
-
-        #     title_author_str = book['title'] + '-' + book['author']
-
-        # print(all_books_synopses_topics)
         return all_books_synopses_topics
     
 
