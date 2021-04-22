@@ -16,13 +16,26 @@ if __name__ == '__main__':
     book_analyzer = BookTextAnalyzer(all_synopses, all_reviews, num_synopses_topics=20, words_per_synopses_topic=10, 
                                     synopses_model_type='lda', num_reviews_topics=5, words_per_reviews_topic=10, 
                                     reviews_model_type='lda')
+    
+    print('\nSynopses Topics: ')
+    for topic in book_analyzer.synopses_topics.keys():
+        print(topic, book_analyzer.synopses_topics[topic])
+
+    print('\n\nReviews Topics: ')
+    for topic in book_analyzer.reviews_topics.keys():
+        print(topic, [w for w,v in book_analyzer.reviews_topics[topic]])
 
     all_books_synopses_topics = book_analyzer.get_books_synopses_classifications(all_books_info)
-    print('ALL BOOKS SYNOPSES TOPICS:')
+    print('\n\nALL BOOKS SYNOPSES TOPICS (classified):')
     for idx, book in enumerate(all_books_synopses_topics.items()):
         if idx > 20:
             break
         print(book)
+    
+    print('\n\nReduced Keyword Set:')
+    review_keywords = book_analyzer.get_reviews_topics_keywords()
+    for topic in review_keywords.keys():
+        print(topic, ':', review_keywords[topic])
 
     ################## NOT IMPLEMENTED YET ####################
 

@@ -24,7 +24,6 @@ class BookTextAnalyzer():
         self.reviews_model_type = reviews_model_type
 
         self.spacy_nlp = spacy.load('en_core_web_sm')
-        # self.spacy_similarity_nlp = spacy.load('en_core_web_lg')
 
         self.synopses_list = synopses_list
         self.reviews_list = reviews_list
@@ -112,31 +111,30 @@ class BookTextAnalyzer():
             model = self.get_reviews_topic_model(text_features)
             words_per_topic = self.words_per_reviews_topic
 
-        topic_clusters = []
+        topic_clusters = {}
 
         for idx, topic_vec in enumerate(model.components_):
-            print(idx, end=' ')
-
+            # print(idx, end=' ')
             topic_words = []
             for fid in topic_vec.argsort()[-1:-words_per_topic-1:-1]:
-                print(text_feature_names[fid], end=' ')
-                topic_words.append(text_feature_names[fid])
+                # print(text_feature_names[fid], end=' ')
+                topic_words.append((text_feature_names[fid], topic_vec[fid]))
 
-            print()
-            topic_clusters.append({str(idx) : topic_words})
+            # print()
+            topic_clusters[str(idx)] = topic_words
 
         return topic_clusters
     
 
     def get_synopses_topics(self):
         '''Topic modeling for book synopses'''
-        print('\nSYNOPSES TOPICS:')
+        # print('\nSYNOPSES TOPICS:')
         return self.get_clusters(self.synopses_list, for_synopses=True)
     
 
     def get_reviews_topics(self):
         '''Topic modeling for book reviews'''
-        print('\nREVIEWS TOPICS:')
+        # print('\nREVIEWS TOPICS:')
         return self.get_clusters(self.reviews_list, for_synopses=False)
     
 
@@ -158,25 +156,71 @@ class BookTextAnalyzer():
             # always add at least top topic - for NMF model probabilities are lower
             if idx == 0:
                 most_relevant_topics.append((topic, output[topic]))
-                print('topic: ', topic, 'prob: ', output[topic])
             # if there is a second or third relevant topic, add it as well
             elif output[topic] >= 0.2:
                 most_relevant_topics.append((topic, output[topic]))
-                print('topic: ', topic, 'prob: ', output[topic])
         return most_relevant_topics
 
     def get_books_synopses_classifications(self, all_books_info_dicts):
         '''Builds a dictionary containg each book and the topics matched most closely by its synopses'''
         all_books_synopses_topics = {}
-        print('\n\nBook Synopses Topics: ')
         for book in all_books_info_dicts[:20]:
-            print(book['title'] + ' - ' + book['author'])
             synopsis = book['synopsis']
             topics = self.get_topics_from_synopsis(synopsis)
             title_author_str = book['title'] + '-' + book['author']
             all_books_synopses_topics[title_author_str.replace(' ', '_')] = topics
         return all_books_synopses_topics
     
+    def get_removal_indices_of_word(self, target, word_list, start_idx=0):
+        target_idxs = []
+        highest_importance = 0.0
+        highest_importance_idx = -1
+        for idx, (word, val) in enumerate(word_list[start_idx:]):
+            real_idx = idx + start_idx
+            if word == target and val > highest_importance:
+                highest_importance = val
+                highest_importance_idx = real_idx
+                target_idxs.append(real_idx)
+            elif word == target:
+                target_idxs.append(real_idx)
+        if highest_importance_idx > -1:
+            target_idxs.remove(highest_importance_idx)
+        print(target, target_idxs)
+        return target_idxs
+
+    def get_reviews_topics_keywords(self):
+        '''Removes duplicates from review topic keywords lists, keeping it on most relevant list'''
+        reviews_topics_keywords_list = []
+        for topic in self.reviews_topics.keys():
+            reviews_topics_keywords_list.extend(self.reviews_topics[topic])
+        
+        print(len(reviews_topics_keywords_list))
+        print(len(set([w for w, v in reviews_topics_keywords_list])))
+        
+        for idx in range(len(reviews_topics_keywords_list)):
+            word, val = reviews_topics_keywords_list[idx]
+            if word != '<DEL>':
+                repeats = self.get_removal_indices_of_word(word, reviews_topics_keywords_list, idx)
+                # print([w for (w, v) in reviews_topics_keywords_list])
+                # print(repeats)
+                # update topic keyword list to remove duplicates
+                if repeats:
+                    reviews_topics_keywords_list = [w_v if i not in repeats else ('<DEL>', 0.0) 
+                                                    for i, w_v in enumerate(reviews_topics_keywords_list)]
+
+        # Reconstruct a reviews topics dictionary with the reduced set of keywords
+        reviews_topics_keywords_reduced = {}
+        current_topic_num = 0
+        current_topic_word_list = []
+        for idx, (word, val) in enumerate(reviews_topics_keywords_list):
+            if idx != 0 and idx % self.words_per_reviews_topic == 0:
+                reviews_topics_keywords_reduced[str(current_topic_num)] = current_topic_word_list.copy()
+                current_topic_num += 1
+                current_topic_word_list.clear()
+            if word != '<DEL>':                  
+                current_topic_word_list.append(word)
+        return reviews_topics_keywords_reduced
+
 
     ##### TODO: FINISH IMPLEMENTING AND TESTING ##########
     # def get_n_most_similar_words(self, word, n=5):
