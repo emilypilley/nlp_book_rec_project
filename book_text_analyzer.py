@@ -185,7 +185,6 @@ class BookTextAnalyzer():
                 target_idxs.append(real_idx)
         if highest_importance_idx > -1:
             target_idxs.remove(highest_importance_idx)
-        print(target, target_idxs)
         return target_idxs
 
     def get_reviews_topics_keywords(self):
@@ -194,16 +193,10 @@ class BookTextAnalyzer():
         for topic in self.reviews_topics.keys():
             reviews_topics_keywords_list.extend(self.reviews_topics[topic])
         
-        print(len(reviews_topics_keywords_list))
-        print(len(set([w for w, v in reviews_topics_keywords_list])))
-        
         for idx in range(len(reviews_topics_keywords_list)):
             word, val = reviews_topics_keywords_list[idx]
             if word != '<DEL>':
                 repeats = self.get_removal_indices_of_word(word, reviews_topics_keywords_list, idx)
-                # print([w for (w, v) in reviews_topics_keywords_list])
-                # print(repeats)
-                # update topic keyword list to remove duplicates
                 if repeats:
                     reviews_topics_keywords_list = [w_v if i not in repeats else ('<DEL>', 0.0) 
                                                     for i, w_v in enumerate(reviews_topics_keywords_list)]
@@ -217,8 +210,10 @@ class BookTextAnalyzer():
                 reviews_topics_keywords_reduced[str(current_topic_num)] = current_topic_word_list.copy()
                 current_topic_num += 1
                 current_topic_word_list.clear()
-            if word != '<DEL>':                  
+            if word != '<DEL>' and word.isascii():                  
                 current_topic_word_list.append(word)
+        reviews_topics_keywords_reduced[str(current_topic_num)] = current_topic_word_list.copy()
+
         return reviews_topics_keywords_reduced
 
 
