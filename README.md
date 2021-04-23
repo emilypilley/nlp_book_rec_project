@@ -14,3 +14,4 @@ With these analyses of a given book as input, a clustering algorithm groups toge
 * [Harvard CS109A Webscraping Tutorial](https://harvard-iacs.github.io/2018-CS109A/labs/lab-2/scraping/student/)
 * [Blog - NLP with Python: Topic Modeling Tutorial](https://sanjayasubedi.com.np/nlp/nlp-with-python-topic-modeling/)
 * [Beyond the Stars - Jakob et al.](https://dl.acm.org/doi/pdf/10.1145/1651461.1651473?casa_token=zVVqi0EC7sUAAAAA:R2pPfxXXAp-iMLvddvSb46Lq2FCy-TRNVihyPpjFRfgyAYIGoEOsVRZ4Q56H0aG_ZlN7anzK1NGcfQ)
+* [Aspect Based Sentiment Analysis Example](https://www.kaggle.com/phiitm/aspect-based-sentiment-analysis/notebook)
