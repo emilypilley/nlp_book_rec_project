@@ -43,7 +43,7 @@ class BookTextAnalyzer():
                 processed_text = pickle.load(f)
         else:
             processed_text = []
-            # lemmatize, remove non-alphabetic words and stopwords
+            # lemmatize, remove non-alphabetic words and stopwords, only keep nouns
             for text in self.spacy_nlp.pipe(text_list):
                 only_alpha_nouns = ' '.join(token.lemma_ for token in text 
                                             if token.lemma_.isalpha() and not token.is_stop and token.pos_ == 'NOUN')
@@ -114,13 +114,9 @@ class BookTextAnalyzer():
         topic_clusters = {}
 
         for idx, topic_vec in enumerate(model.components_):
-            # print(idx, end=' ')
             topic_words = []
             for fid in topic_vec.argsort()[-1:-words_per_topic-1:-1]:
-                # print(text_feature_names[fid], end=' ')
                 topic_words.append((text_feature_names[fid], topic_vec[fid]))
-
-            # print()
             topic_clusters[str(idx)] = topic_words
 
         return topic_clusters
@@ -128,13 +124,11 @@ class BookTextAnalyzer():
 
     def get_synopses_topics(self):
         '''Topic modeling for book synopses'''
-        # print('\nSYNOPSES TOPICS:')
         return self.get_clusters(self.synopses_list, for_synopses=True)
     
 
     def get_reviews_topics(self):
         '''Topic modeling for book reviews'''
-        # print('\nREVIEWS TOPICS:')
         return self.get_clusters(self.reviews_list, for_synopses=False)
     
 
@@ -148,6 +142,7 @@ class BookTextAnalyzer():
         return self.tf_idf_syn_vec.transform([processed_text])
 
     def get_topics_from_synopsis(self, synopsis_text):
+        '''Gets the most relevant topics for a single book's synopsis'''
         synopsis_features = self.get_topic_classification_features(synopsis_text)
         output = np.squeeze(self.synopses_model.transform(synopsis_features))
         top_book_topics = output.argsort(axis=0)[::-1]
@@ -164,12 +159,21 @@ class BookTextAnalyzer():
     def get_books_synopses_classifications(self, all_books_info_dicts):
         '''Builds a dictionary containg each book and the topics matched most closely by its synopses'''
         all_books_synopses_topics = {}
-        for book in all_books_info_dicts[:20]:
+        for book in all_books_info_dicts:
             synopsis = book['synopsis']
             topics = self.get_topics_from_synopsis(synopsis)
             title_author_str = book['title'] + '-' + book['author']
             all_books_synopses_topics[title_author_str.replace(' ', '_')] = topics
         return all_books_synopses_topics
+    
+
+    def get_books_reviews_dict(self, all_books_info_dicts):
+        books_reviews_dict = {}
+        for book in all_books_info_dicts:           
+            title_author_str = book['title'] + '-' + book['author']
+            books_reviews_dict[title_author_str.replace(' ', '_')] = book['reviews_text']
+        return books_reviews_dict
+
     
     def get_removal_indices_of_word(self, target, word_list, start_idx=0):
         target_idxs = []
@@ -215,26 +219,4 @@ class BookTextAnalyzer():
         reviews_topics_keywords_reduced[str(current_topic_num)] = current_topic_word_list.copy()
 
         return reviews_topics_keywords_reduced
-
-
-    ##### TODO: FINISH IMPLEMENTING AND TESTING ##########
-    # def get_n_most_similar_words(self, word, n=5):
-    #     word = self.spacy_similarity_nlp.vocab[word]
-    #     queries = [
-    #         w for w in word.vocabif w.is_lower == word.is_lower and w.prob >= -15 and np.count_nonzero(w.vector)
-    #     ]
-
-    #     by_similarity = sorted(queries, key=lambda w: word.similarity(w), reverse=True)
-    #     return [(w.lower_, w.similarity(word)) for w in by_similarity[:n+1] if w.lower_ != word.lower_]
-
-    # def get_reviews_topics_keywords(self):
-    #     '''Builds a dictionary for each review topic identified containing the list of keywords associated with it'''
-    #     reviews_topics_keywords_dict = self.reviews_topics[topic]
-    #     for topic in reviews_topics_keywords_dict:
-    #         for word in self.reviews_topics[topic]:
-    #             # find lemmas of 5 most similar words to this word and add as keywords
-    #             keywords = self.get_n_most_similar_words(word, n=5)
-    #             reviews_topics_keywords_dict[topic].extend(keywords)
-
-    #     return reviews_topics_keywords_dict
     

@@ -19,36 +19,35 @@ if __name__ == '__main__':
     
     print('\nSynopses Topics: ')
     for topic in book_analyzer.synopses_topics.keys():
-        print(topic, book_analyzer.synopses_topics[topic])
+        print(topic, [w for w, v in book_analyzer.synopses_topics[topic]])
+        print('\n')
+
+    new_book = book_info_obj.get_book_info_from_url('https://www.goodreads.com/book/show/7723542-a-dog-s-purpose')
+    new_book_synopsis = new_book['synopsis']
+    print('Topics of ', new_book['title'])
+    print(book_analyzer.get_topics_from_synopsis(new_book_synopsis))
 
     print('\n\nReviews Topics: ')
     for topic in book_analyzer.reviews_topics.keys():
         print(topic, [w for w,v in book_analyzer.reviews_topics[topic]])
 
     all_books_synopses_topics = book_analyzer.get_books_synopses_classifications(all_books_info)
-    print('\n\nALL BOOKS SYNOPSES TOPICS (classified):')
-    for idx, book in enumerate(all_books_synopses_topics.items()):
-        if idx > 20:
-            break
-        print(book)
+    # print('\n\nALL BOOKS SYNOPSES TOPICS (classified):')
+    # for idx, book in enumerate(all_books_synopses_topics.items()):
+    #     if idx > 20:
+    #         break
+    #     print(book)
     
     print('\n\nReduced Keyword Set:')
     review_keywords = book_analyzer.get_reviews_topics_keywords()
     for topic in review_keywords.keys():
         print(topic, ':', review_keywords[topic])
+    
+    reviews_dict = book_analyzer.get_books_reviews_dict(all_books_info)
+
+
 
     ################## NOT IMPLEMENTED YET ####################
-
-
-    # print('\n\nBook Synopses Topics:\n', all_books_synopses_topics)
-
-    # review_topics_keywords_dict = book_analyzer.get_reviews_topics_keywords()
-    # print('\n\nReview Topics Keywords:\n', review_topics_keywords_dict)
-
-    # books_reviews_dict = {}
-    # for book in all_books_info:
-        # title_author_str = book['title'] + '-' + book['author']
-    #     books_reviews_dict[title_author_str.replace(' ', '_')] = book['reviews_text']
 
     # review_sentiment_analyzer = ReviewTopicsSentimentAnalyzer(books_reviews_dict, review_topics_keywords_dict)
     
