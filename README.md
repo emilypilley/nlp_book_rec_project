@@ -21,7 +21,7 @@ To run the project using existing models for the topic modeling/aspect keyword i
 To train a new model for topic modeling/aspect keyword identification, and a new model for reccomendations to reflect these changes:
 * TODO: fill in
 
-# Resources:
+## Resources:
 * [A Friendly Introduction to Text Clustering](https://towardsdatascience.com/a-friendly-introduction-to-text-clustering-fa996bcefd04)
 * [Harvard CS109A Webscraping Tutorial](https://harvard-iacs.github.io/2018-CS109A/labs/lab-2/scraping/student/)
 * [Beyond the Stars - Jakob et al.](https://dl.acm.org/doi/pdf/10.1145/1651461.1651473?casa_token=zVVqi0EC7sUAAAAA:R2pPfxXXAp-iMLvddvSb46Lq2FCy-TRNVihyPpjFRfgyAYIGoEOsVRZ4Q56H0aG_ZlN7anzK1NGcfQ)
