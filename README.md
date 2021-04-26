@@ -9,10 +9,11 @@ To make the recommendations more specific than only relying on similarities amon
 With these analyses of a given book as input, a clustering algorithm groups together books that are similar in both content and other key qualities, presenting several options for similar books, providing a range of recommendations ranked based on their similarity to the given title.
 
 ## Instructions
-Before running, the packages for the relevant imports must be installed. Outside of the standard list of external packages for assignments, this includes spacy and vadersentiment, and spaCy's 'en_core_web_sm' pipeline should be downloaded. 
+Before running, the packages for the relevant imports must be installed. Outside of the standard list of external packages for assignments, this includes langdetect, spacy and vadersentiment, and spaCy's 'en_core_web_sm' pipeline should be downloaded. 
 * [Install spaCy - Documenation](https://spacy.io/usage)
 * [Install spaCy en_core_web_sm model with conda](https://anaconda.org/conda-forge/spacy-model-en_core_web_sm)
 * [Install VADER sentiment analysis with conda](https://anaconda.org/conda-forge/vadersentiment)
+* [Install langdetect with conda](https://anaconda.org/conda-forge/langdetect)
 
 To run the project using existing models for the topic modeling/aspect keyword identification and reccomendations:
 * TODO: fill in
