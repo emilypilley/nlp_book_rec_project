@@ -57,12 +57,18 @@ if __name__ == '__main__':
     for i in range(6):
         book_list.append(all_books_info[i])
 
+    reviews_sentiment_dict = {}
     for book in book_list:
-        print(book['title'])
         reviews_text = book['reviews_text']
         avg_topic_sentiments = review_sentiment_analyzer.get_book_topic_sentiments(reviews_text)
-        for topic in avg_topic_sentiments:
-            print(topic, avg_topic_sentiments[topic])
+        # print(book['title'])
+        # for topic in avg_topic_sentiments:
+        #     print(topic, avg_topic_sentiments[topic])
+        reviews_sentiment_dict[book['title']] = [(int(topic), sentiment) 
+                                        for topic, sentiment in avg_topic_sentiments.items()]
+    for book in reviews_sentiment_dict:
+        print(book, reviews_sentiment_dict[book])
+        
 
     # reviews_text = all_books_info[0]['reviews_text']
     # aspect_list = []

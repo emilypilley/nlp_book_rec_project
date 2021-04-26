@@ -157,7 +157,11 @@ class BookTextAnalyzer():
         return most_relevant_topics
 
     def get_books_synopses_classifications(self, all_books_info_dicts):
-        '''Builds a dictionary containg each book and the topics matched most closely by its synopses'''
+        '''Builds a dictionary containg each book and the topics matched most closely by its synopses.
+        
+        Entries in the dictionary are keys, consiting of the title and author name, and a list of the
+        most relevant topics for that book, which contains tuples of the topic number and relevancy of it.
+        '''
         all_books_synopses_topics = {}
         for book in all_books_info_dicts:
             synopsis = book['synopsis']

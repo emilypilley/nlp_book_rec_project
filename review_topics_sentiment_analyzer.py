@@ -50,7 +50,7 @@ class ReviewTopicsSentimentAnalyzer():
     
 
     def get_book_topic_sentiments(self, reviews_text):
-        '''For a single book, returns a dictionary of the avg sentiments for each topic'''
+        '''For a list of reviews, returns a dictionary of the avg sentiments for each topic.'''
         # summing up topic sentiments and keeping count of number of times the topic is addressed
         total_topic_sentiment_count = {}
         for review in reviews_text:
@@ -80,12 +80,30 @@ class ReviewTopicsSentimentAnalyzer():
         for topic in total_topic_sentiment_count:
             sent_sum, count = total_topic_sentiment_count[topic]
             # only consider topics that were mentioned at least 3 times
-            if count > 3:
+            # and do not consider topics that are purely neutral
+            if count > 3 and sent_sum != 0.0:
                 avg_topic_sentiments[topic] = sent_sum/count
 
         return avg_topic_sentiments                
 
 
     def get_all_books_reivews_aspects_sentiments(self):
-        '''For each book, finds the average sentiment for each topic'''
-        pass
+        '''For each book, finds the average sentiment for each topic.
+        
+        Builds and saves a dictionary containing each book (identified by the title and
+        author), and a list of the topics addressed in the reviews and the average sentiment 
+        expressed for that topic.'''
+
+        if path.exists('rec_features/review_aspect_sentiments.p'):
+            with open('rec_features/review_aspect_sentiments.p', 'rb') as f:
+                return pickle.load(f)
+        else:
+            reviews_sentiment_dict = {}
+            for book, reviews in self.books_reviews_dict:
+                avg_topic_sentiments = self.get_book_topic_sentiments(book['reviews_text'])
+                reviews_sentiment_dict[book] = [(int(topic), sentiment) 
+                                                for topic, sentiment in avg_topic_sentiments.items()]
+            
+            with open('rec_features/review_aspect_sentiments.p', 'wb') as f:
+                pickle.dump(reviews_sentiment_dict, f)
+            return reviews_sentiment_dict
