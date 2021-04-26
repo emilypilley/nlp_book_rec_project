@@ -52,22 +52,30 @@ if __name__ == '__main__':
     print("\nREVIEW KEYWORDS: ", review_keywords_dict.keys())
 
     review_sentiment_analyzer = ReviewTopicsSentimentAnalyzer(reviews_dict, review_keywords_dict)
+    review_sentiments_dict = review_sentiment_analyzer.get_all_books_reivews_aspects_sentiments()
+    
+    i = 0
+    for book, topic_sents in review_sentiments_dict.items():
+        if i > 4:
+            break
+        print(book, topic_sents)
+        i += 1
 
-    book_list = []
-    for i in range(6):
-        book_list.append(all_books_info[i])
+    # book_list = []
+    # for i in range(6):
+    #     book_list.append(all_books_info[i])
 
-    reviews_sentiment_dict = {}
-    for book in book_list:
-        reviews_text = book['reviews_text']
-        avg_topic_sentiments = review_sentiment_analyzer.get_book_topic_sentiments(reviews_text)
-        # print(book['title'])
-        # for topic in avg_topic_sentiments:
-        #     print(topic, avg_topic_sentiments[topic])
-        reviews_sentiment_dict[book['title']] = [(int(topic), sentiment) 
-                                        for topic, sentiment in avg_topic_sentiments.items()]
-    for book in reviews_sentiment_dict:
-        print(book, reviews_sentiment_dict[book])
+    # reviews_sentiment_dict = {}
+    # for book in book_list:
+    #     reviews_text = book['reviews_text']
+    #     avg_topic_sentiments = review_sentiment_analyzer.get_book_topic_sentiments(reviews_text)
+    #     # print(book['title'])
+    #     # for topic in avg_topic_sentiments:
+    #     #     print(topic, avg_topic_sentiments[topic])
+    #     reviews_sentiment_dict[book['title']] = [(int(topic), sentiment) 
+    #                                     for topic, sentiment in avg_topic_sentiments.items()]
+    # for book in reviews_sentiment_dict:
+    #     print(book, reviews_sentiment_dict[book])
         
 
     # reviews_text = all_books_info[0]['reviews_text']

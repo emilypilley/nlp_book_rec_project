@@ -38,6 +38,7 @@ class BookTextAnalyzer():
 
 
     def get_training_text_features(self, text_list, features):
+        '''Processes and saves text, and builds TF-IDF feature vectors.'''
         if path.exists('top_books_data/' + features + '_processed_text.p'):
             with open('top_books_data/' + features + '_processed_text.p', 'rb') as f:
                 processed_text = pickle.load(f)
@@ -68,6 +69,7 @@ class BookTextAnalyzer():
     
 
     def get_synopses_topic_model(self, text_features):
+        '''Train/save or load synopses topic model.'''
         if path.exists('topic_models/synopses_' + self.synopses_model_type + '_model_' + str(self.num_synopses_topics) + '_topics.joblib'):
             with open('topic_models/synopses_' + self.synopses_model_type + '_model_' + str(self.num_synopses_topics) + '_topics.joblib', 'rb') as f:
                 model = joblib.load(f)
@@ -85,6 +87,7 @@ class BookTextAnalyzer():
         return model
     
     def get_reviews_topic_model(self, text_features):
+        '''Train/save or load reviews topic model.'''
         if path.exists('topic_models/reviews_' + self.reviews_model_type + '_model_' + str(self.num_reviews_topics) + '_topics.joblib'):
             with open('topic_models/reviews_' + self.reviews_model_type + '_model_' + str(self.num_reviews_topics) + '_topics.joblib', 'rb') as f:
                 model = joblib.load(f)
@@ -102,6 +105,7 @@ class BookTextAnalyzer():
 
 
     def get_clusters(self, text_list, for_synopses=False):
+        '''Returns the topics and associated words from the trained topic model.'''
         if for_synopses:
             text_features, text_feature_names = self.get_training_text_features(text_list, 'synopses')
             model = self.get_synopses_topic_model(text_features)
@@ -123,16 +127,17 @@ class BookTextAnalyzer():
     
 
     def get_synopses_topics(self):
-        '''Topic modeling for book synopses'''
+        '''Trains a model for topic modeling of the book synopses'''
         return self.get_clusters(self.synopses_list, for_synopses=True)
     
 
     def get_reviews_topics(self):
-        '''Topic modeling for book reviews'''
+        '''Trains a model for topic modeling of the books reviews'''
         return self.get_clusters(self.reviews_list, for_synopses=False)
     
 
     def get_topic_classification_features(self, synopsis):
+        '''For a single synopsis, processes the text returns a TF-IDF feature vector.'''
         only_alpha_nouns = []
         for token in self.spacy_nlp(synopsis):
             if token.lemma_.isalpha() and not token.is_stop and token.pos_ == 'NOUN':
@@ -142,7 +147,7 @@ class BookTextAnalyzer():
         return self.tf_idf_syn_vec.transform([processed_text])
 
     def get_topics_from_synopsis(self, synopsis_text):
-        '''Gets the most relevant topics for a single book's synopsis'''
+        '''Returns the most relevant topic(s) for a single book's synopsis.'''
         synopsis_features = self.get_topic_classification_features(synopsis_text)
         output = np.squeeze(self.synopses_model.transform(synopsis_features))
         top_book_topics = output.argsort(axis=0)[::-1]
@@ -157,10 +162,11 @@ class BookTextAnalyzer():
         return most_relevant_topics
 
     def get_books_synopses_classifications(self, all_books_info_dicts):
-        '''Builds a dictionary containg each book and the topics matched most closely by its synopses.
+        '''Builds a dictionary of each book and the topic(s) in its synopses.
         
-        Entries in the dictionary are keys, consiting of the title and author name, and a list of the
-        most relevant topics for that book, which contains tuples of the topic number and relevancy of it.
+        Entries in the dictionary are keys, consiting of the title and author 
+        name, and a list of the most relevant topics for that book, which contains 
+        tuples of the topic number and relevancy of that topic to the synopsis.
         '''
         all_books_synopses_topics = {}
         for book in all_books_info_dicts:
@@ -172,6 +178,7 @@ class BookTextAnalyzer():
     
 
     def get_books_reviews_dict(self, all_books_info_dicts):
+        '''Returns a dictionary containing each book and a list of the reviews.'''
         books_reviews_dict = {}
         for book in all_books_info_dicts:           
             title_author_str = book['title'] + '-' + book['author']
@@ -180,6 +187,13 @@ class BookTextAnalyzer():
 
     
     def get_removal_indices_of_word(self, target, word_list, start_idx=0):
+        '''Finds indices where a repeated keyword should be removed from the topic
+        keyword list.
+        
+        Keeps track of how relevant the keyword is to each topic (if found in 
+        multiple topic keyword lists), and returns the indices of the keyword 
+        for all but the most relvant instance of it.
+        '''
         target_idxs = []
         highest_importance = 0.0
         highest_importance_idx = -1
@@ -197,7 +211,11 @@ class BookTextAnalyzer():
 
 
     def get_reviews_topics_keywords(self):
-        '''Removes duplicates from review topic keywords lists, keeping it on most relevant list'''
+        '''Returns a dictionary of topic keywords and the topic associated with each.
+
+        Removes duplicates from review topic keywords lists, keeping one instance of
+        the keyword on the list where it is the most relevant. Dictionary output 
+        includes the topic number and the relevancy of the keyword to that topic.'''
         reviews_topics_keywords_list = []
         for topic in self.reviews_topics.keys():
             reviews_topics_keywords_list.extend([(w, v, int(topic)) for (w, v) in self.reviews_topics[topic]])

@@ -1,6 +1,7 @@
 from os import path
 import spacy
 import re
+import pickle
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 class ReviewTopicsSentimentAnalyzer():
@@ -99,8 +100,8 @@ class ReviewTopicsSentimentAnalyzer():
                 return pickle.load(f)
         else:
             reviews_sentiment_dict = {}
-            for book, reviews in self.books_reviews_dict:
-                avg_topic_sentiments = self.get_book_topic_sentiments(book['reviews_text'])
+            for book, reviews in self.books_reviews_dict.items():
+                avg_topic_sentiments = self.get_book_topic_sentiments(reviews)
                 reviews_sentiment_dict[book] = [(int(topic), sentiment) 
                                                 for topic, sentiment in avg_topic_sentiments.items()]
             
