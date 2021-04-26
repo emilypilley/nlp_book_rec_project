@@ -24,7 +24,7 @@ To train a new model for topic modeling/aspect keyword identification, and a new
 * [A Friendly Introduction to Text Clustering](https://towardsdatascience.com/a-friendly-introduction-to-text-clustering-fa996bcefd04)
 * [Harvard CS109A Webscraping Tutorial](https://harvard-iacs.github.io/2018-CS109A/labs/lab-2/scraping/student/)
 * [Beyond the Stars - Jakob et al.](https://dl.acm.org/doi/pdf/10.1145/1651461.1651473?casa_token=zVVqi0EC7sUAAAAA:R2pPfxXXAp-iMLvddvSb46Lq2FCy-TRNVihyPpjFRfgyAYIGoEOsVRZ4Q56H0aG_ZlN7anzK1NGcfQ)
-* [spaCy Linguistic Features Documentation] (https://spacy.io/usage/linguistic-features)
+* [spaCy Linguistic Features Documentation](https://spacy.io/usage/linguistic-features)
 * [Blog - NLP with Python: Topic Modeling Tutorial](https://sanjayasubedi.com.np/nlp/nlp-with-python-topic-modeling/)
 * [Aspect Based Sentiment Analysis Example](https://towardsdatascience.com/aspect-based-sentiment-analysis-using-spacy-textblob-4c8de3e0d2b9)
 * [Content Based Movie Recommendation System Using Cosine Similarity](https://analyticsindiamag.com/how-to-build-a-content-based-movie-recommendation-system-in-python/)
