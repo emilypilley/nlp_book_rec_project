@@ -9,10 +9,11 @@ from sklearn.decomposition import NMF
 from sklearn.decomposition import LatentDirichletAllocation as LDA
    
 
-class BookTextAnalyzer():
+class BookTextAnalyzer:
     def __init__(self, synopses_list, reviews_list, num_synopses_topics=20, 
                 words_per_synopses_topic=10, num_reviews_topics=20, 
-                words_per_reviews_topic=10, synopses_model_type='nmf', reviews_model_type='nmf',seed=7):
+                words_per_reviews_topic=10, synopses_model_type='nmf', 
+                reviews_model_type='nmf',seed=7):
         self.seed = seed
 
         self.num_synopses_topics = num_synopses_topics
@@ -162,7 +163,7 @@ class BookTextAnalyzer():
         return most_relevant_topics
 
     def get_books_synopses_classifications(self, all_books_info_dicts):
-        '''Builds a dictionary of each book and the topic(s) in its synopses.
+        '''Builds a dictionary for each book and the topic(s) in its synopses.
         
         Entries in the dictionary are keys, consiting of the title and author 
         name, and a list of the most relevant topics for that book, which contains 

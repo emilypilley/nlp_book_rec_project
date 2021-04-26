@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import langdetect
 
 
-class GoodreadsBookInfo():
+class GoodreadsBookInfo:
     def __init__(self, num_pages=5, num_books=500):
         assert num_books <= 100 * num_pages
         self.URLSTART = 'https://goodreads.com'

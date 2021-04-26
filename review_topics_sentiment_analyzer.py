@@ -4,7 +4,7 @@ import re
 import pickle
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-class ReviewTopicsSentimentAnalyzer():
+class ReviewTopicsSentimentAnalyzer:
     def __init__(self, books_reviews_dict, topics_keywords_dict):
         self.books_reviews_dict = books_reviews_dict
         self.topics_keywords_dict = topics_keywords_dict
@@ -102,7 +102,7 @@ class ReviewTopicsSentimentAnalyzer():
             reviews_sentiment_dict = {}
             for book, reviews in self.books_reviews_dict.items():
                 avg_topic_sentiments = self.get_book_topic_sentiments(reviews)
-                reviews_sentiment_dict[book] = [(int(topic), sentiment) 
+                reviews_sentiment_dict[book] = [(topic, sentiment) 
                                                 for topic, sentiment in avg_topic_sentiments.items()]
             
             with open('rec_features/review_aspect_sentiments.p', 'wb') as f:
