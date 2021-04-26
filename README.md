@@ -8,10 +8,24 @@ To make the recommendations more specific than only relying on similarities amon
 
 With these analyses of a given book as input, a clustering algorithm groups together books that are similar in both content and other key qualities, presenting several options for similar books, providing a range of recommendations ranked based on their similarity to the given title.
 
+## Instructions
+Before running, the packages for the relevant imports must be installed. Outside of the standard list of external packages for assignments, this includes spacy and vadersentiment, and spaCy's 'en_core_web_sm' pipeline should be downloaded. 
+* [Install spaCy - Documenation](https://spacy.io/usage)
+* [Install spaCy en_core_web_sm model with conda](https://anaconda.org/conda-forge/spacy-model-en_core_web_sm)
+* [Install VADER sentiment analysis with conda](https://anaconda.org/conda-forge/vadersentiment)
+
+To run the project using existing models for the topic modeling/aspect keyword identification and reccomendations:
+* TODO: fill in
+
+To train a new model for topic modeling/aspect keyword identification, and a new model for reccomendations to reflect these changes:
+* TODO: fill in
 
 # Resources:
 * [A Friendly Introduction to Text Clustering](https://towardsdatascience.com/a-friendly-introduction-to-text-clustering-fa996bcefd04)
 * [Harvard CS109A Webscraping Tutorial](https://harvard-iacs.github.io/2018-CS109A/labs/lab-2/scraping/student/)
-* [Blog - NLP with Python: Topic Modeling Tutorial](https://sanjayasubedi.com.np/nlp/nlp-with-python-topic-modeling/)
 * [Beyond the Stars - Jakob et al.](https://dl.acm.org/doi/pdf/10.1145/1651461.1651473?casa_token=zVVqi0EC7sUAAAAA:R2pPfxXXAp-iMLvddvSb46Lq2FCy-TRNVihyPpjFRfgyAYIGoEOsVRZ4Q56H0aG_ZlN7anzK1NGcfQ)
+* [spaCy Linguistic Features Documentation] (https://spacy.io/usage/linguistic-features
+* [Blog - NLP with Python: Topic Modeling Tutorial](https://sanjayasubedi.com.np/nlp/nlp-with-python-topic-modeling/)
 * [Aspect Based Sentiment Analysis Example](https://towardsdatascience.com/aspect-based-sentiment-analysis-using-spacy-textblob-4c8de3e0d2b9)
+* [Content Based Movie Recommendation System Using Cosine Similarity](https://analyticsindiamag.com/how-to-build-a-content-based-movie-recommendation-system-in-python/)
+
