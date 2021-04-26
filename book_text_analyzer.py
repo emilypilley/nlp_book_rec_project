@@ -179,7 +179,7 @@ class BookTextAnalyzer():
         target_idxs = []
         highest_importance = 0.0
         highest_importance_idx = -1
-        for idx, (word, val) in enumerate(word_list[start_idx:]):
+        for idx, (word, val, topic) in enumerate(word_list[start_idx:]):
             real_idx = idx + start_idx
             if word == target and val > highest_importance:
                 highest_importance = val
@@ -191,32 +191,25 @@ class BookTextAnalyzer():
             target_idxs.remove(highest_importance_idx)
         return target_idxs
 
+
     def get_reviews_topics_keywords(self):
         '''Removes duplicates from review topic keywords lists, keeping it on most relevant list'''
         reviews_topics_keywords_list = []
         for topic in self.reviews_topics.keys():
-            reviews_topics_keywords_list.extend(self.reviews_topics[topic])
+            reviews_topics_keywords_list.extend([(w, v, int(topic)) for (w, v) in self.reviews_topics[topic]])
         
         for idx in range(len(reviews_topics_keywords_list)):
-            word, val = reviews_topics_keywords_list[idx]
-            if word != '<DEL>':
-                repeats = self.get_removal_indices_of_word(word, reviews_topics_keywords_list, idx)
-                if repeats:
-                    reviews_topics_keywords_list = [w_v if i not in repeats else ('<DEL>', 0.0) 
-                                                    for i, w_v in enumerate(reviews_topics_keywords_list)]
+            word, val, topic = reviews_topics_keywords_list[idx]
+            repeats = self.get_removal_indices_of_word(word, reviews_topics_keywords_list, idx)
+            if repeats:
+                reviews_topics_keywords_list = [(w, v, t) for i, (w, v, t) in enumerate(reviews_topics_keywords_list) 
+                                                if i not in repeats and w.isascii()]
+            if idx == len(reviews_topics_keywords_list) - 1:
+                break
 
-        # Reconstruct a reviews topics dictionary with the reduced set of keywords
         reviews_topics_keywords_reduced = {}
-        current_topic_num = 0
-        current_topic_word_list = []
-        for idx, (word, val) in enumerate(reviews_topics_keywords_list):
-            if idx != 0 and idx % self.words_per_reviews_topic == 0:
-                reviews_topics_keywords_reduced[str(current_topic_num)] = current_topic_word_list.copy()
-                current_topic_num += 1
-                current_topic_word_list.clear()
-            if word != '<DEL>' and word.isascii():                  
-                current_topic_word_list.append(word)
-        reviews_topics_keywords_reduced[str(current_topic_num)] = current_topic_word_list.copy()
+        for (w, v, t) in reviews_topics_keywords_list:
+            reviews_topics_keywords_reduced[w] = (t, v)
 
         return reviews_topics_keywords_reduced
     

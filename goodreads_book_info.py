@@ -37,7 +37,6 @@ class GoodreadsBookInfo():
         if path.exists('top_books_data/url_list.txt'):
             url_list_file = open('top_books_data/url_list.txt','r')
             return url_list_file.read().splitlines()
-
         else:
             book_url_list = []
             for i in range(1, num_pages + 1):
