@@ -11,8 +11,13 @@ class ReviewTopicsSentimentAnalyzer():
         self.spacy_nlp = spacy.load('en_core_web_sm')
         self.sentiment_analyzer = SentimentIntensityAnalyzer()
     
-    def get_reivew_aspects_sentiments(self, review_text):
-        '''Returns tuples of each topics addressed in the review and its corresponding sentiment score
+    def get_reivew_aspects(self, review_text):
+        ''' Finds the aspects addressed in a review, and their associated modifiers.
+
+        Returns a list of (keyword, modifiers, negation) tuple for a single review,
+        where the keyword is from the topic keywords list, the modifiers is a list
+        of modifiers that apply to that keyword, and negation is a boolean value
+        corresponding to whethere a negation word applies to the aspect sentiment.
         '''
         keyword_mod_list = []
         review = self.spacy_nlp(review_text)
@@ -25,7 +30,7 @@ class ReviewTopicsSentimentAnalyzer():
                     # if token.pos_ == 'NOUN':
                     if token.dep_ == 'nsubj':
                         if token.lemma_ in self.topics_keywords_dict:
-                            keywords.append(token.text)
+                            keywords.append(token.lemma_)
                     elif token.dep_ == 'neg':
                         negation = True
                     if token.dep_ == 'amod' or token.pos_ == 'ADJ':
@@ -42,8 +47,45 @@ class ReviewTopicsSentimentAnalyzer():
                     keyword_mod_list.append((keyword, modifiers, negation))
         
         return keyword_mod_list
+    
+
+    def get_book_topic_sentiments(self, reviews_text):
+        '''For a single book, returns a dictionary of the avg sentiments for each topic'''
+        # summing up topic sentiments and keeping count of number of times the topic is addressed
+        total_topic_sentiment_count = {}
+        for review in reviews_text:
+            keyword_mod_list = self.get_reivew_aspects(review)
+            for keyword, modifiers, negation in keyword_mod_list:
+                # find the topic the keyword falls under and make sure it is valid - it should always be
+                try:
+                    topic, _ = self.topics_keywords_dict[keyword]
+                except KeyError:
+                    print('Invalid keyword: ', keyword)
+                    continue
+                # find the sentiment
+                sentiment = self.sentiment_analyzer.polarity_scores(' '.join(modifiers))['compound']
+                if negation:
+                    sentiment = -sentiment
+                # print(topic, sentiment)
+                if topic in total_topic_sentiment_count:
+                    sent_sum, count = total_topic_sentiment_count[topic]
+                    sent_sum += sentiment
+                    count += 1
+                    total_topic_sentiment_count[topic] = (sentiment, count)
+                else:
+                    total_topic_sentiment_count[topic] = (sentiment, 1)
+                # print(topic, keyword, sentiment)
+        
+        avg_topic_sentiments = {}
+        for topic in total_topic_sentiment_count:
+            sent_sum, count = total_topic_sentiment_count[topic]
+            # only consider topics that were mentioned at least 3 times
+            if count > 3:
+                avg_topic_sentiments[topic] = sent_sum/count
+
+        return avg_topic_sentiments                
 
 
     def get_all_books_reivews_aspects_sentiments(self):
-        '''For each book, finds the average sentiment for each topic if topic is mentioned in more than two reviews'''
+        '''For each book, finds the average sentiment for each topic'''
         pass

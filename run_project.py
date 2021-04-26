@@ -53,15 +53,23 @@ if __name__ == '__main__':
 
     review_sentiment_analyzer = ReviewTopicsSentimentAnalyzer(reviews_dict, review_keywords_dict)
 
-    book = all_books_info[0]
-    reviews_text = book['reviews_text']
-    # review_text = ('The book was very good, however the characters were not very well-written. '
-                    # + 'I think the story was wonderful though')
+    book_list = []
+    for i in range(6):
+        book_list.append(all_books_info[i])
 
-    print('\nASPECTS: ')
-    aspect_list = []
-    for review in reviews_text:
-        res = review_sentiment_analyzer.get_reivew_aspects_sentiments(review)
-        print(res, '\n')
+    for book in book_list:
+        print(book['title'])
+        reviews_text = book['reviews_text']
+        avg_topic_sentiments = review_sentiment_analyzer.get_book_topic_sentiments(reviews_text)
+        for topic in avg_topic_sentiments:
+            print(topic, avg_topic_sentiments[topic])
+
+    # reviews_text = all_books_info[0]['reviews_text']
+    # aspect_list = []
+    # for review in reviews_text:
+    #     res = review_sentiment_analyzer.get_reivew_aspects(review)
+    #     print(res, '\n')
+
+
     
     
