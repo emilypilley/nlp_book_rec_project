@@ -21,7 +21,7 @@ To run the project using existing models for the topic modeling/aspect keyword i
 * The train_recommender_system() function is called with default values for the number of books to train on, model types for topic modeling, and number of topics to extract from the synopses and reviews, however if these defaults are changed to values corresponding with existing models (found under the topic_models directory), the model will not be retrained.
 
 To train a new model for topic modeling/aspect keyword identification, and a new model for reccomendations to reflect these changes:
-* Set the parameters of the train_recommender_system() function to new values that do not correspond with existing models in the topic_models directory, and run the project with your chosen books as described above. Note that changing the number of words per topic output will not retrain a new model, if that is the only difference from the default values.
+* In "run_project.py" set the parameters of the train_recommender_system() function to new values that do not correspond with existing models in the topic_models directory, and run the project with your chosen books as described above. This can take quite a while to run. Note that changing the number of words per topic output will not retrain a new model, if that is the only difference from the default values.
 
 ## Resources:
 * [A Friendly Introduction to Text Clustering](https://towardsdatascience.com/a-friendly-introduction-to-text-clustering-fa996bcefd04)
