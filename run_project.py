@@ -75,14 +75,14 @@ def train_recommender_system(num_pages=5, num_books=500, num_synopses_topics=20,
             
     book_features_df = book_recommender.get_combined_synopsis_reviews_features_df()
     book_feature_dicts = book_recommender.books_features_dicts
-    
+
     if verbose:
         print('\nTop 5 Books Feature Dictionaries')
         for book in book_feature_dicts[:5]:
             print(book)
         print()
     
-    # print(book_recommender.get_books_features_for_recs())
+    book_recommender.group_similar_books()
 
     return book_info_obj, book_recommender
         
@@ -94,6 +94,7 @@ def recommend_books(new_book_url, book_info_obj, book_recommender, verbose=True)
     new_book_reviews = new_book['reviews_text']
 
     if verbose:
+        print()
         print(new_book['title'] + ' - ' + new_book['author'])
         print('\nSynopsis Topics:')
         print(book_recommender.book_text_analyzer.get_topics_from_synopsis(new_book_synopsis))

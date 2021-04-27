@@ -1,6 +1,9 @@
 from os import path
 import pandas as pd
-from sklearn.feature_extraction import DictVectorizer
+from sklearn import metrics
+from sklearn.cluster import DBSCAN
+from sklearn.preprocessing import StandardScaler
+
 from book_text_analyzer import BookTextAnalyzer
 from review_topics_sentiment_analyzer import ReviewTopicsSentimentAnalyzer
 
@@ -16,7 +19,8 @@ class BookRecommender:
             self.review_topics_sentiment_analyzer.get_all_books_reivews_aspects_sentiments())
 
         self.books_features_dicts = None
-        self.dict_vectorizer = DictVectorizer()
+        self.book_features_df = self.get_combined_synopsis_reviews_features_df()
+
 
     def get_combined_synopsis_reviews_features_df(self):
         '''Returns a dataframe of the combined synopsis and reviews feature for all the books.
@@ -48,18 +52,22 @@ class BookRecommender:
         return df
 
 
-    def get_book_features_for_recs(self, book_feature_dicts_list):
-        '''Uses DictVectorizer to represent variable number of features.
-        
-        Input is a list of book feature dictionaries, with a variable number
-        of synopsis topics and review topic sentiments.'''
-        features = self.dict_vectorizer.transform(book_features_dicts_list)
-        print(features.toarray())
-        print(dict_vectorizer.get_feature_names())
-        return features
-    
-    def group_similar_books(self, book):
-        pass
+    def group_similar_books(self):
+        '''Uses DBSCAN to cluster books based on features gathered from synopses and reviews'''
+        scaler = StandardScaler()
+        scaled_features = scaler.fit_transform(self.book_features_df)
+
+        dbscan = DBSCAN(eps=3.0, min_samples=5).fit(scaled_features)
+        labels = dbscan.labels_
+
+        # Number of clusters in labels, ignoring noise if present.
+        n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+        n_noise_ = list(labels).count(-1)
+
+        print('Estimated number of clusters: %d' % n_clusters_)
+        print('Estimated number of noise points: %d' % n_noise_)
+        print("Silhouette Coefficient: %0.3f"
+            % metrics.silhouette_score(scaled_features, labels))
 
     def find_top_n_recommendations(self, book):
         pass
