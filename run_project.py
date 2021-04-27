@@ -111,8 +111,15 @@ if __name__ == '__main__':
     # or load existing data and models if they already exist
     book_info_obj, book_recommender = train_recommender_system()
 
-    new_book_url = "https://www.goodreads.com/book/show/7723542-a-dog-s-purpose"
-    recommend_books(new_book_url, book_info_obj, book_recommender)
+    # new_book_url = "https://www.goodreads.com/book/show/7723542-a-dog-s-purpose"
+    # recommend_books(new_book_url, book_info_obj, book_recommender)
+
+    new_book_name = 'Harry Potter and the Order of the Phoenix'
+    rec_list = book_recommender.find_top_n_recommendations(new_book_name)
+
+    print('Books similar to ', new_book_name)
+    for book in rec_list:
+        print(book)
     
 
 

@@ -1,5 +1,6 @@
 from os import path
 import pandas as pd
+import validators
 from sklearn import metrics
 from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import StandardScaler
@@ -31,9 +32,10 @@ class BookRecommender:
         and all empty cells are filled in with 0.0.'''
 
         books_features_dicts = []
-        df_indices = []
+
         for book in set(self.books_synopses_topics_dict).union(self.books_reivews_aspects_sentiments_dict):
             book_features = {}
+            book_features['title-author'] = book
             review_topics_list = []
             synopsis_topics_list = []
             for topic, sentiment in self.books_reivews_aspects_sentiments_dict[book]:
@@ -42,11 +44,10 @@ class BookRecommender:
                 book_features['synopsis_topic_' + str(topic)] = relevancy
             
             books_features_dicts.append(book_features)
-            df_indices.append(book)
         
         self.books_features_dicts = books_features_dicts
         
-        df = pd.DataFrame(books_features_dicts, index=df_indices)
+        df = pd.DataFrame(books_features_dicts)
         df = df.fillna(0.0)
         df.to_csv("recommendation_features.csv")
 
@@ -56,7 +57,8 @@ class BookRecommender:
     def group_similar_books(self):
         '''Uses DBSCAN to cluster books based on features gathered from synopses and reviews'''
         scaler = StandardScaler()
-        scaled_features = scaler.fit_transform(self.book_features_df)
+        df_features = self.book_features_df.loc[:, self.book_features_df.columns != 'title-author']
+        scaled_features = scaler.fit_transform(df_features)
 
         dbscan = DBSCAN(eps=3.0, min_samples=5).fit(scaled_features)
         labels = dbscan.labels_
@@ -79,8 +81,61 @@ class BookRecommender:
             cluster_list = []
             for idx in clustered_df.index:
                 if clustered_df['Group'][idx] == i:
-                    cluster_list.append(idx)
+                    cluster_list.append(clustered_df['title-author'][idx])
             print(i, cluster_list, '\n')
 
-    def find_top_n_recommendations(self, book):
-        pass
+
+    def get_book_df_idx_for_rec(self, book):
+        '''Returns the index in the dataframe for the requested book.
+        
+        If user inputs a URL, they are looking to add a book to the dataset, 
+        and the necessary features will be extracted from the page. If the user
+        did not input a valid URL, they are trying to use an existing book in the 
+        dataset, and the appropriate frame will be extracted if it existis.'''
+
+        book_idx = None
+        if validators.url(book):
+            # TODO: get features and add to dataframe
+            print("String is a valid URL - Need to implement still")
+            # raise error if it was a URL but info couldn't be extracted
+        else:
+            book_name = book.replace(' ', '_').lower()
+            for idx in self.book_features_df.index:
+                if self.book_features_df['title-author'][idx].lower().startswith(book_name):
+                    book_idx = idx
+            if book_idx == None:
+                raise Exception(book + ' is not in dataset, please add it first.')
+        
+        return book_idx
+
+
+    def find_top_n_recommendations(self, book, num_books=10):
+        '''Get top n book reccomendations based on cosine similarity'''
+        if num_books < 1 or num_books > 50:
+            raise Error('Number of books to reccomend must be between 1 and 50')
+
+        book_idx = self.get_book_df_idx_for_rec(book)
+        if book_idx is not None:
+            # Calculate cosine similarity over all books
+            df_features = self.book_features_df.loc[:, self.book_features_df.columns != 'title-author']
+            cosine_sim = cosine_similarity(df_features)
+            similar_books = list(enumerate(cosine_sim[book_idx]))
+            sorted_similar_books = (
+                sorted(similar_books, key=lambda x:x[1], reverse=True))
+            print('all sim books: ', len(sorted_similar_books))
+            
+            similar_books_list = []
+            count = 0
+            for idx, sim in sorted_similar_books:
+                # The most similar book will be itself
+                if count == 0:
+                    count += 1
+                    continue
+                book_str = self.book_features_df.at[idx, 'title-author']
+                similar_books_list.append(book_str)
+                count += 1
+                if count > num_books:
+                    break
+            return similar_books_list
+        else:
+            raise Exception('Sorry, we could not find the requested book.')
