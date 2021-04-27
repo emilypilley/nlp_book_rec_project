@@ -70,7 +70,7 @@ def train_recommender_system(num_pages=5, num_books=500, num_synopses_topics=20,
     # Use synopsis topic categorizations and review aspect sentiments to 
     # recommend new books based on similarity    
     book_recommender = (
-        BookRecommender(all_books_info=all_books_info, book_text_analyzer=book_analyzer, 
+        BookRecommender(book_info_obj=book_info_obj, book_text_analyzer=book_analyzer, 
                         review_topics_sentiment_analyzer=review_sentiment_analyzer))
             
     book_features_df = book_recommender.get_combined_synopsis_reviews_features_df()
@@ -87,21 +87,6 @@ def train_recommender_system(num_pages=5, num_books=500, num_synopses_topics=20,
     return book_info_obj, book_recommender
         
 
-def recommend_books(new_book_url, book_info_obj, book_recommender, verbose=True):
-    '''Returns reccomendations based on overall topic and opinions expressed in reviews.'''
-    new_book = book_info_obj.get_book_info_from_url(new_book_url)
-    new_book_synopsis = new_book['synopsis']
-    new_book_reviews = new_book['reviews_text']
-
-    if verbose:
-        print()
-        print(new_book['title'] + ' - ' + new_book['author'])
-        print('\nSynopsis Topics:')
-        print(book_recommender.book_text_analyzer.get_topics_from_synopsis(new_book_synopsis))
-        print('\nReivew Topics + Sentiments:')
-        print(book_recommender.review_topics_sentiment_analyzer.get_book_topic_sentiments(new_book_reviews))
-
-
 if __name__ == '__main__':
     # Need this for pickling
     max_rec = 0x100000
@@ -111,16 +96,29 @@ if __name__ == '__main__':
     # or load existing data and models if they already exist
     book_info_obj, book_recommender = train_recommender_system()
 
-    # new_book_url = "https://www.goodreads.com/book/show/7723542-a-dog-s-purpose"
-    # recommend_books(new_book_url, book_info_obj, book_recommender)
-
+    # The following is an example of getting recommendations for a book that
+    # already exists in the dataset - the (first part) of the name must be an
+    # exact match with the title of the book in the dataset
     new_book_name = 'Harry Potter and the Order of the Phoenix'
-    rec_list = book_recommender.find_top_n_recommendations(new_book_name)
+    rec_list_1 = book_recommender.find_top_n_recommendations(new_book_name)
 
     print('Books similar to ', new_book_name)
-    for book in rec_list:
+    for book in rec_list_1:
         print(book)
     
+    # The following are books that are not currently in the dataset, which is ensured 
+    # because they were obtained from later in the Goodread's most popular books list
+    new_book_url_list = ["https://www.goodreads.com/book/show/7723542-a-dog-s-purpose",
+                        "https://www.goodreads.com/book/show/3869.A_Brief_History_of_Time",
+                        "https://www.goodreads.com/book/show/7631105-the-scorch-trials",
+                        "https://www.goodreads.com/book/show/1371.The_Iliad",
+                        "https://www.goodreads.com/book/show/3063499-the-lucky-one"
+                        ]
+    for book_url in new_book_url_list:
+        rec_list_2 = book_recommender.find_top_n_recommendations(book_url)
+        print('\nBooks similar to ', book_url)
+        for book in rec_list_2:
+            print(book)    
 
 
     
