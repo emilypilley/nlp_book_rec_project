@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn import metrics
 from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics.pairwise import cosine_similarity
 
 from book_text_analyzer import BookTextAnalyzer
 from review_topics_sentiment_analyzer import ReviewTopicsSentimentAnalyzer
@@ -59,6 +60,7 @@ class BookRecommender:
 
         dbscan = DBSCAN(eps=3.0, min_samples=5).fit(scaled_features)
         labels = dbscan.labels_
+        print(labels)
 
         # Number of clusters in labels, ignoring noise if present.
         n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
@@ -68,6 +70,17 @@ class BookRecommender:
         print('Estimated number of noise points: %d' % n_noise_)
         print("Silhouette Coefficient: %0.3f"
             % metrics.silhouette_score(scaled_features, labels))
+        
+        clustered_df = self.book_features_df
+        clustered_df['Group'] = labels
+
+        print('\nBook Groups:')
+        for i in range(-1, n_clusters_):
+            cluster_list = []
+            for idx in clustered_df.index:
+                if clustered_df['Group'][idx] == i:
+                    cluster_list.append(idx)
+            print(i, cluster_list, '\n')
 
     def find_top_n_recommendations(self, book):
         pass
