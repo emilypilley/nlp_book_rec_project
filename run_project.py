@@ -72,7 +72,9 @@ def train_recommender_system(num_pages=5, num_books=500, num_synopses_topics=20,
     book_recommender = (
         BookRecommender(all_books_info=all_books_info, book_text_analyzer=book_analyzer, 
                         review_topics_sentiment_analyzer=review_sentiment_analyzer))
-    book_feature_dicts = book_recommender.get_combined_synopsis_reviews_dicts()
+            
+    book_features_df = book_recommender.get_combined_synopsis_reviews_features_df()
+    book_feature_dicts = book_recommender.books_features_dicts
     
     if verbose:
         print('\nTop 5 Books Feature Dictionaries')
@@ -80,10 +82,13 @@ def train_recommender_system(num_pages=5, num_books=500, num_synopses_topics=20,
             print(book)
         print()
     
+    # print(book_recommender.get_books_features_for_recs())
+
     return book_info_obj, book_recommender
         
 
 def recommend_books(new_book_url, book_info_obj, book_recommender, verbose=True):
+    '''Returns reccomendations based on overall topic and opinions expressed in reviews.'''
     new_book = book_info_obj.get_book_info_from_url(new_book_url)
     new_book_synopsis = new_book['synopsis']
     new_book_reviews = new_book['reviews_text']
