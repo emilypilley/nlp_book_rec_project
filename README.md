@@ -29,6 +29,6 @@ To train a new model for topic modeling/aspect keyword identification, and a new
 * [NLP with Python: Topic Modeling Tutorial](https://sanjayasubedi.com.np/nlp/nlp-with-python-topic-modeling/)
 * [Aspect Based Sentiment Analysis Example](https://towardsdatascience.com/aspect-based-sentiment-analysis-using-spacy-textblob-4c8de3e0d2b9)
 * [VADER Sentiment Analysis Tutorial](https://www.geeksforgeeks.org/python-sentiment-analysis-using-vader/)
-* [Content Based Movie Recommendation System Using Cosine Similarity](https://analyticsindiamag.com/how-to-build-a-content-based-movie-recommendation-system-in-python/)
+* [Movie Recommendation System Using Cosine Similarity](https://towardsdatascience.com/using-cosine-similarity-to-build-a-movie-recommendation-system-ae7f20842599)
 * [Cosine Similarity and Handling Categorical Variables](https://medium.com/@rahulkuntala9/cosine-similarity-and-handling-categorical-variables-29f907951b5)
 
