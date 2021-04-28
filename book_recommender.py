@@ -19,7 +19,9 @@ class BookRecommender:
         self.books_synopses_topics_dict = (
             self.book_text_analyzer.get_books_synopses_classifications(self.all_books_info))
         self.books_reivews_aspects_sentiments_dict = (
-            self.review_topics_sentiment_analyzer.get_all_books_reivews_aspects_sentiments())
+            self.review_topics_sentiment_analyzer.get_all_books_reivews_aspects_sentiments(
+                self.book_text_analyzer.reviews_model_type, self.book_text_analyzer.num_reviews_topics
+            ))
 
         self.books_features_dicts = None
         self.book_features_df = self.get_combined_synopsis_reviews_features_df()
