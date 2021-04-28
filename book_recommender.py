@@ -5,7 +5,6 @@ from sklearn import metrics
 from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
-
 from book_text_analyzer import BookTextAnalyzer
 from review_topics_sentiment_analyzer import ReviewTopicsSentimentAnalyzer
 
@@ -64,7 +63,6 @@ class BookRecommender:
 
         dbscan = DBSCAN(eps=3.0, min_samples=5).fit(scaled_features)
         labels = dbscan.labels_
-        print(labels)
 
         # Number of clusters in labels, ignoring noise if present.
         n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
@@ -134,7 +132,6 @@ class BookRecommender:
         if validators.url(book):
             book_feature_dict = self.get_synopsis_reviews_features_dict_from_url(book)
             book_title_author = book_feature_dict['title-author']
-            print(book_feature_dict)
             df = pd.DataFrame(book_feature_dict, index=[0])
             self.book_features_df = self.book_features_df.append(df, ignore_index = True)
             self.book_features_df = self.book_features_df.fillna(0.0)
@@ -164,7 +161,6 @@ class BookRecommender:
             raise Error('Number of books to reccomend must be between 1 and 50')
 
         book_idx = self.get_book_df_idx_for_rec(book)
-        print('book index = ', book_idx)
         if book_idx is not None:
             # Calculate cosine similarity over all books
             df_features = self.book_features_df.loc[:, self.book_features_df.columns != 'title-author']

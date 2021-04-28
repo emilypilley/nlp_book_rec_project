@@ -95,16 +95,10 @@ class ReviewTopicsSentimentAnalyzer:
         author), and a list of the topics addressed in the reviews and the average sentiment 
         expressed for that topic.'''
 
-        if path.exists('rec_features/review_aspect_sentiments.p'):
-            with open('rec_features/review_aspect_sentiments.p', 'rb') as f:
-                return pickle.load(f)
-        else:
-            reviews_sentiment_dict = {}
-            for book, reviews in self.books_reviews_dict.items():
-                avg_topic_sentiments = self.get_book_topic_sentiments(reviews)
-                reviews_sentiment_dict[book] = [(topic, sentiment) 
-                                                for topic, sentiment in avg_topic_sentiments.items()]
-            
-            with open('rec_features/review_aspect_sentiments.p', 'wb') as f:
-                pickle.dump(reviews_sentiment_dict, f)
-            return reviews_sentiment_dict
+        reviews_sentiment_dict = {}
+        for book, reviews in self.books_reviews_dict.items():
+            avg_topic_sentiments = self.get_book_topic_sentiments(reviews)
+            reviews_sentiment_dict[book] = [(topic, sentiment) 
+                                            for topic, sentiment in avg_topic_sentiments.items()]
+        
+        return reviews_sentiment_dict
